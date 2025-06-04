@@ -1,0 +1,73 @@
+# ================================
+# Operating System & Editor Files
+# ================================
+# macOS
+.DS_Store
+
+# Linux swap
+.*.swp
+
+# Vim
+*.swp
+*~
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# ================================
+# Build Artifacts & Binaries
+# ================================
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Compiled Bash artifacts (if any)
+*.out
+*.log
+
+# Docker
+docker/Dockerfile.agent
+docker/Dockerfile.central
+docker/entrypoint.sh
+
+# =================================
+# Dependency & Vendor Directories
+# =================================
+vendor/
+node_modules/
+
+# =================================
+# Logs & Runtime Data
+# =================================
+*.log
+*.tmp
+*.pid
+/var/lib/proc-dash/
+/var/log/proc-dash/
+
+# =================================
+# Kubernetes & Helm
+# =================================
+*.tgz
+helm-chart/*.tgz
+
+# =================================
+# CI/CD & Coverage Reports
+# =================================
+coverage.out
+*.cov
+reports/
+*.prof
+
+# =================================
+# Other
+# =================================
+.env
