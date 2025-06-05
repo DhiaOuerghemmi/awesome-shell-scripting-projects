@@ -1,0 +1,104 @@
+# Default values for process-dashboard Helm chart.
+
+# -------------------------------
+# Image configuration
+# -------------------------------
+image:
+  agent:
+    repository: myregistry.com/proc-dash/agent
+    tag: latest
+    pullPolicy: IfNotPresent
+  central:
+    repository: myregistry.com/proc-dash/central
+    tag: latest
+    pullPolicy: IfNotPresent
+
+# -------------------------------
+# Agent DaemonSet settings
+# -------------------------------
+agent:
+  enabled: true
+  configMapName: ""
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "16Mi"
+    limits:
+      cpu: "200m"
+      memory: "64Mi"
+  tolerations: []
+  nodeSelector: {}
+  affinity: {}
+
+# -------------------------------
+# Central Deployment settings
+# -------------------------------
+central:
+  enabled: true
+  replicas: 3
+  configMapName: ""
+  secretsName: ""
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# -------------------------------
+# Service configuration
+# -------------------------------
+service:
+  type: ClusterIP
+  collectorPort: 8443
+  apiPort: 8080
+
+# -------------------------------
+# ConfigMap: agent and central config.yaml
+# -------------------------------
+config:
+  agentConfig: |-
+    # Example agent config; override in --set or using a separate YAML file
+    thresholds:
+      process:
+        cpu_pct: 80
+        mem_pct: 70
+    smtp:
+      host: smtp.example.com
+      port: 587
+      user: alert@example.com
+      pass: super-secret
+    email:
+      to: ops@example.com
+      from: alert@example.com
+    whitelist:
+      - "critical_service_*"
+  # If using central config, define here; can merge agent/central as needed
+  centralConfig: |-
+    # Placeholder for central service config if needed in future
+
+# -------------------------------
+# Secrets: TLS certificates & tokens
+# -------------------------------
+secrets:
+  tls:
+    cert: ""   # Base64-encoded tls.crt
+    key: ""    # Base64-encoded tls.key
+  # Add more tokens/secrets as needed
+
+# -------------------------------
+# Ingress (optional)
+# -------------------------------
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

@@ -1,0 +1,18 @@
+apiVersion: v2
+name: process-dashboard
+description: A Helm chart for deploying Proc-Dash Agent and Central Services
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - monitoring
+  - process
+  - dashboard
+  - agent
+  - collector
+  - notifier
+  - api
+home: https://github.com/yourorg/process-dashboard
+maintainers:
+  - name: Your Name
+    email: you@example.com
