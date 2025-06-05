@@ -1,0 +1,55 @@
+{{- if .Values.agent.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "process-dashboard.fullname" . }}-agent
+  labels:
+    app: {{ include "process-dashboard.name" . }}
+    component: agent
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "process-dashboard.name" . }}
+      component: agent
+  template:
+    metadata:
+      labels:
+        app: {{ include "process-dashboard.name" . }}
+        component: agent
+    spec:
+      serviceAccountName: {{ include "process-dashboard.serviceAccountName" . }}
+      securityContext:
+        runAsUser: 1000  # proc_dash user ID
+        fsGroup: 1000    # proc_dash group ID
+      tolerations:
+        {{- toYaml .Values.agent.tolerations | nindent 8 }}
+      nodeSelector:
+        {{- toYaml .Values.agent.nodeSelector | nindent 8 }}
+      affinity:
+        {{- toYaml .Values.agent.affinity | nindent 8 }}
+      containers:
+        - name: proc-dash-agent
+          image: "{{ .Values.image.agent.repository }}:{{ .Values.image.agent.tag }}"
+          imagePullPolicy: {{ .Values.image.agent.pullPolicy }}
+          command: [ "bash", "-c", "exec /usr/local/bin/collector.sh | /usr/local/bin/enforcer.sh" ]
+          resources:
+            requests:
+              cpu: {{ .Values.agent.resources.requests.cpu }}
+              memory: {{ .Values.agent.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.agent.resources.limits.cpu }}
+              memory: {{ .Values.agent.resources.limits.memory }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/proc-dash
+            - name: logs
+              mountPath: /var/log/proc-dash
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.agent.configMapName | default (include "process-dashboard.fullname" .) }}-agent-config
+        - name: logs
+          hostPath:
+            path: /var/log/proc-dash
+            type: DirectoryOrCreate
+{{- end }}
