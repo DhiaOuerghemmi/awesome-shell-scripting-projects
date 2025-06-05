@@ -1,0 +1,33 @@
+name: Bats Tests
+
+# Run on pull requests targeting any branch
+on:
+  pull_request:
+
+jobs:
+  bats-test:
+    name: Run Bats Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Install dependencies for Bats tests
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bats \
+            jq \
+            yq \
+            mailx \
+            procps \
+            dialog
+
+      # 3. Run Bats tests under tests/bats
+      - name: Run Bats Tests
+        run: |
+          cd tests/bats
+          bats .
