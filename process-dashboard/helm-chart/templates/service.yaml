@@ -1,0 +1,23 @@
+{{- if .Values.central.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "process-dashboard.fullname" . }}-svc
+  labels:
+    app: {{ include "process-dashboard.name" . }}
+    component: central
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: collector-tls
+      port: {{ .Values.service.collectorPort }}
+      protocol: TCP
+      targetPort: {{ .Values.service.collectorPort }}
+    - name: api-http
+      port: {{ .Values.service.apiPort }}
+      protocol: TCP
+      targetPort: {{ .Values.service.apiPort }}
+  selector:
+    app: {{ include "process-dashboard.name" . }}
+    component: central
+{{- end }}

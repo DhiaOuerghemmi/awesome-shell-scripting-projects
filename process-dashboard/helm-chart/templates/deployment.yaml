@@ -1,0 +1,118 @@
+{{- if .Values.central.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "process-dashboard.fullname" . }}-central
+  labels:
+    app: {{ include "process-dashboard.name" . }}
+    component: central
+spec:
+  replicas: {{ .Values.central.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "process-dashboard.name" . }}
+      component: central
+  template:
+    metadata:
+      labels:
+        app: {{ include "process-dashboard.name" . }}
+        component: central
+    spec:
+      serviceAccountName: {{ include "process-dashboard.serviceAccountName" . }}
+      securityContext:
+        fsGroup: 1000
+      nodeSelector:
+        {{- toYaml .Values.central.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.central.tolerations | nindent 8 }}
+      affinity:
+        {{- toYaml .Values.central.affinity | nindent 8 }}
+      containers:
+        - name: collector
+          image: "{{ .Values.image.central.repository }}:{{ .Values.image.central.tag }}"
+          imagePullPolicy: {{ .Values.image.central.pullPolicy }}
+          command: [ "/collector" ]
+          resources:
+            requests:
+              cpu: {{ .Values.central.resources.requests.cpu }}
+              memory: {{ .Values.central.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.central.resources.limits.cpu }}
+              memory: {{ .Values.central.resources.limits.memory }}
+          ports:
+            - containerPort: {{ .Values.service.collectorPort }}
+              name: tls
+          env:
+            - name: TLS_CERT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.central.secretsName }}
+                  key: tls.crt
+            - name: TLS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.central.secretsName }}
+                  key: tls.key
+            - name: CA_BUNDLE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.central.secretsName }}
+                  key: ca.crt
+          volumeMounts:
+            - name: config
+              mountPath: /etc/central
+        - name: notifier
+          image: "{{ .Values.image.central.repository }}:{{ .Values.image.central.tag }}"
+          imagePullPolicy: {{ .Values.image.central.pullPolicy }}
+          command: [ "/notifier" ]
+          resources:
+            requests:
+              cpu: {{ .Values.central.resources.requests.cpu }}
+              memory: {{ .Values.central.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.central.resources.limits.cpu }}
+              memory: {{ .Values.central.resources.limits.memory }}
+          env:
+            - name: SLACK_WEBHOOK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.central.secretsName }}
+                  key: slack_webhook
+            - name: PAGERDUTY_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.central.secretsName }}
+                  key: pagerduty_token
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.central.secretsName }}
+                  key: smtp_host
+          volumeMounts:
+            - name: config
+              mountPath: /etc/central
+        - name: api-server
+          image: "{{ .Values.image.central.repository }}:{{ .Values.image.central.tag }}"
+          imagePullPolicy: {{ .Values.image.central.pullPolicy }}
+          command: [ "/api_server" ]
+          resources:
+            requests:
+              cpu: {{ .Values.central.resources.requests.cpu }}
+              memory: {{ .Values.central.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.central.resources.limits.cpu }}
+              memory: {{ .Values.central.resources.limits.memory }}
+          ports:
+            - containerPort: {{ .Values.service.apiPort }}
+              name: http
+          env:
+            - name: API_ADDR
+              value: ":{{ .Values.service.apiPort }}"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/central
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.central.configMapName | default (include "process-dashboard.fullname" .) }}-central-config
+{{- end }}
