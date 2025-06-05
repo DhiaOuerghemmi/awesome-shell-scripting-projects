@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Process Dashboard Agent once every minute
+
+[Timer]
+# Calendar-based schedule: every minute (similar to cron "* * * * *")
+OnCalendar=*:0/1
+# Ensure the timer service triggers even if the system was asleep
+Persistent=true
+Unit=proc-dash-agent-run.service
+
+[Install]
+WantedBy=timers.target

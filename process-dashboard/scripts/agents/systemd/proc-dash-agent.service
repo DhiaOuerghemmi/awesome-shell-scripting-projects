@@ -1,0 +1,24 @@
+[Unit]
+Description=Process Dashboard Agent (daemon mode)
+After=network.target
+
+[Service]
+Type=simple
+User=proc_dash
+Group=proc_dash
+Environment="CONFIG_PATH=/etc/proc-dash/config.yaml"
+# Run collector.sh piped to enforcer.sh as a continuous pipeline
+# Use exec so that systemd tracks the correct PID.
+ExecStart=/usr/bin/env bash -c "exec /usr/local/bin/collector.sh | /usr/local/bin/enforcer.sh"
+Restart=on-failure
+RestartSec=10s
+# Allow a large number of open files for scanning /proc and logs
+LimitNOFILE=65536
+# Grant only the capabilities this service absolutely needs:
+#   - CAP_SYS_PTRACE: to inspect process details in /proc
+#   - CAP_KILL: to send signals (SIGTERM/SIGKILL) to target processes
+CapabilityBoundingSet=CAP_SYS_PTRACE CAP_KILL
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target
