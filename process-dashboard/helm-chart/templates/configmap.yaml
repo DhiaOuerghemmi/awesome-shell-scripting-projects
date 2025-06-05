@@ -1,0 +1,23 @@
+# ConfigMap for agent and central configurations
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "process-dashboard.fullname" . }}-agent-config
+  labels:
+    app: {{ include "process-dashboard.name" . }}
+    component: agent
+data:
+  config.yaml: |-
+{{ .Values.config.agentConfig | indent 4 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "process-dashboard.fullname" . }}-central-config
+  labels:
+    app: {{ include "process-dashboard.name" . }}
+    component: central
+data:
+  config.yaml: |-
+{{ .Values.config.centralConfig | indent 4 }}
