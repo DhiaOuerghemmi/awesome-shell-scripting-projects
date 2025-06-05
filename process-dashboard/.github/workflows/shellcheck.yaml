@@ -1,0 +1,26 @@
+name: ShellCheck Lint
+
+# Run on pull requests targeting any branch
+on:
+  pull_request:
+
+jobs:
+  shellcheck-lint:
+    name: Lint Bash Scripts with ShellCheck
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Install ShellCheck
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      # 3. Run ShellCheck on all .sh files under scripts/agents
+      - name: Run ShellCheck
+        run: |
+          find scripts/agents -type f -name "*.sh" -print0 | xargs -0 shellcheck
