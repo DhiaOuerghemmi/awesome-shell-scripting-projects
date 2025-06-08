@@ -12,27 +12,28 @@ Shell scripting remains an indispensable skill for automating system tasks, orch
 
 ## Projects Overview
 
-| Project Name                             | Level       | Status     |
-|------------------------------------------|-------------|------------|
-| Process Dashboard & Alert System         |Intermediate | Completed  |
-|                                          |             |            |
-|                                          |             |            |
+| Project Name                     | Level        | Status      |
+| -------------------------------- | ------------ | ----------- |
+| Process Dashboard & Alert System | Intermediate | In Progress |
+|                                  |              |             |
 
-> **How to use this table**:  
-> - **Project Name**: Click through to the project folder for detailed instructions, code, and documentation.  
-> - **Level**:  
->   - *Beginner*: Simple scripts demonstrating core Bash syntax, control flow, and basic utilities.  
->   - *Intermediate*: Multi-module scripts involving external tools (e.g., `jq`, `yq`, `dialog`) and moderate complexity.  
->   - *Advanced*: Full production-ready solutions with systemd integration, Dockerization, CI/CD, and multi-language scaffolds (Go, YAML, Helm, etc.).  
-> - **Status**:  
->   - *Completed*: Fully implemented, tested, and documented.  
->   - *In Progress*: Currently under development.  
->   - *Planned*: Design phase—no code yet.
+> **How to use this table**:
+>
+> - **Project Name**: Click through to the project folder for detailed instructions, code, and documentation.
+> - **Level**:
+>   - _Beginner_: Simple scripts demonstrating core Bash syntax, control flow, and basic utilities.
+>   - _Intermediate_: Multi-module scripts involving external tools (e.g., `jq`, `yq`, `dialog`) and moderate complexity.
+>   - _Advanced_: Full production-ready solutions with systemd integration, Dockerization, CI/CD, and multi-language scaffolds (Go, YAML, Helm, etc.).
+> - **Status**:
+>   - _Completed_: Fully implemented, tested, and documented.
+>   - _In Progress_: Currently under development.
+>   - _Planned_: Design phase—no code yet.
 
 ---
 
 ## How to Contribute
 
-1. **Fork this repository** and create a feature branch:  
+1. **Fork this repository** and create a feature branch:
    ```bash
    git checkout -b feature/my-new-script
+   ```
