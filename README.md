@@ -15,7 +15,7 @@ Shell scripting remains an indispensable skill for automating system tasks, orch
 | Project Name                     | Level        | Status      |
 | -------------------------------- | ------------ | ----------- |
 | Process Dashboard & Alert System | Intermediate | In Progress |
-|                                  |              |             |
+| Package Health Monitor|Beginner | In Progress |
 
 > **How to use this table**:
 >
