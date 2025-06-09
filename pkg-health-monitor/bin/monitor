@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
 # Core launcher for Package Manager Health Monitor
+# Usage: monitor [--config PATH] [--dry-run] [-h|--help]
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -21,7 +22,7 @@ Options:
 EOF
 }
 
-# --- argument parsing (unchanged) ---
+# Argument parsing (unchanged)...
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -c|--config) CONFIG_FILE="$2"; shift 2;;
@@ -31,7 +32,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# --- config loading (unchanged) ---
+# Determine config file
 if [[ -z "${CONFIG_FILE}" ]]; then
   CONFIG_FILE="${DEFAULT_CONF}"
 fi
@@ -39,21 +40,28 @@ if [[ ! -f "${CONFIG_FILE}" ]]; then
   echo "Config file not found: ${CONFIG_FILE}" >&2
   exit 2
 fi
+
+# Load config
 # shellcheck source=/dev/null
 source "${CONFIG_FILE}"
 
-# --- source our new check scripts ---
-# shellcheck source=../scripts/apt_check.sh
+# Load package checks
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/../scripts/apt_check.sh"
-# shellcheck source=../scripts/yum_check.sh
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/../scripts/yum_check.sh"
-# shellcheck source=../scripts/dnf_check.sh
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/../scripts/dnf_check.sh"
 
+# Load notifications
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/../scripts/notification.sh"
+
+# Dry-run prints config & exit
 if [[ "${DRY_RUN}" == true ]]; then
-  echo "⚙️  Dry-run mode: config loaded, check functions sourced."
-  declare -p CHECK_INTERVAL EMAIL_RECIPIENT SLACK_WEBHOOK_URL PACKAGES_TO_CHECK
+  echo "🔧 Dry-run mode. Configuration:"
+  declare -p CHECK_INTERVAL EMAIL_RECIPIENT EMAIL_SUBJECT SLACK_WEBHOOK_URL SLACK_MESSAGE_PREFIX PACKAGES_TO_CHECK
   exit 0
 fi
 
-# (Next up: invoke apt_check, yum_check, or dnf_check based on PACKAGES_TO_CHECK)
+# (Later: invoke checks, call send_email/send_slack on failures)
