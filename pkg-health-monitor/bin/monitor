@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+#
+# Core launcher for Package Manager Health Monitor
+# Usage: monitor [--config PATH] [--dry-run] [-h|--help]
+set -euo pipefail
+IFS=$'\n\t'
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_CONF="${SCRIPT_DIR}/../configs/monitor.conf"
+
+CONFIG_FILE=""
+DRY_RUN=false
+
+function usage() {
+  cat <<EOF
+Usage: $(basename "$0") [options]
+
+Options:
+  -c, --config PATH    Path to config file (default: ${DEFAULT_CONF})
+  -n, --dry-run        Parse config and print values without executing checks
+  -h, --help           Show this help message and exit
+EOF
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -c|--config)
+      CONFIG_FILE="$2"; shift 2;;
+    -n|--dry-run)
+      DRY_RUN=true; shift;;
+    -h|--help)
+      usage; exit 0;;
+    *)
+      echo "Unknown option: $1" >&2; usage; exit 1;;
+  esac
+done
+
+# Determine which config to load
+if [[ -z "${CONFIG_FILE}" ]]; then
+  CONFIG_FILE="${DEFAULT_CONF}"
+fi
+
+if [[ ! -f "${CONFIG_FILE}" ]]; then
+  echo "Config file not found: ${CONFIG_FILE}" >&2
+  exit 2
+fi
+
+# Load config
+# shellcheck source=/dev/null
+source "${CONFIG_FILE}"
+
+# For dry-run, just print loaded values
+if [[ "${DRY_RUN}" == true ]]; then
+  echo "Running in dry-run mode. Loaded configuration:"
+  declare -p CHECK_INTERVAL EMAIL_RECIPIENT SLACK_WEBHOOK_URL PACKAGES_TO_CHECK
+  exit 0
+fi
+
+# (Actual monitoring logic will go here)
+
