@@ -22,7 +22,7 @@ Options:
 EOF
 }
 
-# Argument parsing (unchanged)...
+# 1) Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -c|--config) CONFIG_FILE="$2"; shift 2;;
@@ -32,36 +32,54 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Determine config file
-if [[ -z "${CONFIG_FILE}" ]]; then
-  CONFIG_FILE="${DEFAULT_CONF}"
-fi
-if [[ ! -f "${CONFIG_FILE}" ]]; then
-  echo "Config file not found: ${CONFIG_FILE}" >&2
+# 2) Determine config file
+[[ -z "$CONFIG_FILE" ]] && CONFIG_FILE="$DEFAULT_CONF"
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  echo "Config file not found: $CONFIG_FILE" >&2
   exit 2
 fi
 
-# Load config
+# 3) Load config
 # shellcheck source=/dev/null
-source "${CONFIG_FILE}"
+source "$CONFIG_FILE"
 
-# Load package checks
+# 4) Dry-run: dump config & exit
+if [[ "$DRY_RUN" == true ]]; then
+  echo "🔧 Dry-run mode. Loaded configuration:"
+  declare -p CHECK_INTERVAL EMAIL_RECIPIENT EMAIL_SUBJECT \
+            SLACK_WEBHOOK_URL SLACK_MESSAGE_PREFIX PACKAGES_TO_CHECK
+  exit 0
+fi
+
+# 5) Source all functionality
 # shellcheck source=/dev/null
 source "${SCRIPT_DIR}/../scripts/apt_check.sh"
 # shellcheck source=/dev/null
 source "${SCRIPT_DIR}/../scripts/yum_check.sh"
 # shellcheck source=/dev/null
 source "${SCRIPT_DIR}/../scripts/dnf_check.sh"
-
-# Load notifications
 # shellcheck source=/dev/null
 source "${SCRIPT_DIR}/../scripts/notification.sh"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/../scripts/cleanup.sh"
 
-# Dry-run prints config & exit
-if [[ "${DRY_RUN}" == true ]]; then
-  echo "🔧 Dry-run mode. Configuration:"
-  declare -p CHECK_INTERVAL EMAIL_RECIPIENT EMAIL_SUBJECT SLACK_WEBHOOK_URL SLACK_MESSAGE_PREFIX PACKAGES_TO_CHECK
-  exit 0
-fi
+# 6) Run the checks + cleanup + notifications
+for pm in ${PACKAGES_TO_CHECK}; do
+  check_fn="${pm}_check"
+  clean_fn="${pm}_cleanup"
 
-# (Later: invoke checks, call send_email/send_slack on failures)
+  echo "▶️  Running initial ${pm} check..."
+  if ! $check_fn; then
+    echo "❗ Issues detected for ${pm}. Cleaning & retrying..."
+    if retry_check "$check_fn" "$clean_fn"; then
+      echo "✅ ${pm} healthy after cleanup."
+    else
+      echo "❌ ${pm} still unhealthy after cleanup."
+      msg="[${pm^}] Health check failed after cleanup"
+      send_email "${EMAIL_SUBJECT}" "${msg}"
+      send_slack  "${msg}"
+    fi
+  else
+    echo "✅ ${pm} is healthy."
+  fi
+done
