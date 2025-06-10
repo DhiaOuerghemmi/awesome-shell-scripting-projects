@@ -1,0 +1,33 @@
+{
+  "id": null,
+  "title": "Package Health Dashboard",
+  "tags": ["linux", "packages"],
+  "timezone": "browser",
+  "schemaVersion": 30,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Package Cache Size",
+      "targets": [
+        {
+          "expr": "pkg_cache_size_bytes",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "stat",
+      "title": "Total Cleanups",
+      "targets": [
+        {
+          "expr": "pkg_cleanup_total",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    }
+  ]
+}
